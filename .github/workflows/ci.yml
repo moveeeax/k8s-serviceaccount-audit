@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: python -m pip install --upgrade pip && pip install -e '.[dev]'
+
+      - name: Test
+        run: python -m pytest -q
+
+      - name: Clean cluster exits 0
+        run: k8s-serviceaccount-audit --input examples/clean-cluster.json
+
+      - name: Dirty cluster exits 1
+        run: |
+          set +e
+          k8s-serviceaccount-audit --input examples/dirty-cluster.json
+          code=$?
+          set -e
+          test "$code" -eq 1
+
+      - name: JSON output is parsable
+        run: |
+          set +e
+          k8s-serviceaccount-audit --input examples/dirty-cluster.json --format json > findings.json
+          set -e
+          python -c "import json,sys; d=json.load(open('findings.json')); assert d['summary']['high'] > 0, d"
+
+      - name: Reads stdin
+        run: |
+          set +e
+          cat examples/dirty-cluster.json | k8s-serviceaccount-audit --format csv
+          code=$?
+          set -e
+          test "$code" -eq 1
+
+      - name: Unreadable input exits 2
+        run: |
+          set +e
+          echo '{broken' | k8s-serviceaccount-audit --input -
+          code=$?
+          set -e
+          test "$code" -eq 2

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "k8s-serviceaccount-audit"
+version = "0.1.0"
+description = "Audit Kubernetes ServiceAccounts offline from kubectl JSON: unused accounts, needless mounted tokens, default-SA usage, legacy token Secrets, cluster-admin bindings"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Michael Tarassov", email = "michael@tarassov.me" }]
+keywords = ["kubernetes", "rbac", "serviceaccount", "security", "audit", "cli"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: System :: Systems Administration",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.urls]
+Homepage = "https://github.com/moveeeax/k8s-serviceaccount-audit"
+Issues = "https://github.com/moveeeax/k8s-serviceaccount-audit/issues"
+
+[project.scripts]
+k8s-serviceaccount-audit = "k8s_serviceaccount_audit.cli:main"
+
+[tool.setuptools]
+packages = ["k8s_serviceaccount_audit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

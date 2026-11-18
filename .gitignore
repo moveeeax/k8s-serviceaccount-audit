@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Builds and local envs (anchored to the repo root so no source directory matches)
+/build/
+/dist/
+/.venv/
+/venv/
+/*.egg-info/
+/findings.json
+
+# Fixtures are part of the test suite and must always be tracked
+!examples/**
+!tests/**
